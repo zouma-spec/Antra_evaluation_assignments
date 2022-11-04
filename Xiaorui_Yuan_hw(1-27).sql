@@ -294,7 +294,7 @@ from(
 select e.StockGroupName, year(a.OrderDate) year_, sum(b.quantity) quantity_sold
 from Sales.Orders a
 join sales.OrderLines b
-on a.OrderID=b.OrderID                --I noticed null values got missing for 18-19, but don't have time to modify the query, will denifitely look into it later
+on a.OrderID=b.OrderID              --I noticed null values got missing for question 18-19, but don't have time to modify the query, will denifitely look into it later
 join Warehouse.StockItems c
 on c.StockItemID=b.StockItemID
 join Warehouse.StockItemStockGroups d
