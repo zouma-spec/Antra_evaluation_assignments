@@ -1,6 +1,5 @@
 Use WideWorldImporters
 GO
-select * from Application.People
 -- 1.List of Persons’ full name, all their fax and phone numbers, as well as the phone number and fax of the company they are working for (if any).
 select a.PersonID, a.FullName, a.PhoneNumber, a.FaxNumber, b.PhoneNumber company_phone, b.FaxNumber company_fax, b.CustomerName company --customer companies
 from Application.People a 
@@ -202,7 +201,7 @@ join Sales.Orderlines b
 on a.StockItemID=b.StockItemID
 join Sales.Orders c
 on c.OrderID=b.OrderID
-join Sales.Customers d
+join Sales.Customers d                                  -- this is not perfect, couldn't be able to print 'No sale'
 on d.CustomerID=c.CustomerID
 right join Application.Cities e
 on d.DeliveryCityID=e.CityID
@@ -218,6 +217,7 @@ select r.CityID, r.StockitemID, deliveries
 from delivery_rank as r
 where rank_id =1
 order by r.CityID
+
 
 --15.List any orders that had more than one delivery attempt (located in invoice table).
 --#way 1
@@ -373,10 +373,15 @@ COMMIT TRAN
 END
 
 EXECUTE ods.uspGetOrderTotalandInsert '2013-01-01'
+GO
 EXECUTE ods.uspGetOrderTotalandInsert '2013-02-01'
+GO
 EXECUTE ods.uspGetOrderTotalandInsert '2013-03-01'
+GO
 EXECUTE ods.uspGetOrderTotalandInsert '2013-04-01'
+GO
 EXECUTE ods.uspGetOrderTotalandInsert '2013-05-01'
+GO
 --check result
 select * from ods.Orders
 
@@ -384,7 +389,7 @@ select * from ods.Orders
 -- Migrate all the data in the original stock item table.
 IF OBJECT_ID(N'ods.StockItem', N'U') IS NOT NULL  
    DROP TABLE ods.StockItem;
---GO 
+GO 
 CREATE TABLE ods.StockItem(
 StockItemID int PRIMARY KEY,
 StockItemName nvarchar(100),
@@ -433,7 +438,7 @@ IF OBJECT_ID('ods.uspOrderTotalWipeandUpdate','P') IS NOT NULL
 GO
 CREATE PROCEDURE ods.uspOrderTotalWipeandUpdate @OrderDate date
 AS
-BEGIN 
+BEGIN                                                                                            
    BEGIN TRAN
       --delete all the order data prior to the input date
       Delete from ods.Orders
@@ -444,16 +449,20 @@ BEGIN
       from Sales.Orders as a
       join Sales.Orderlines as b
       on a.OrderID=b.OrderID
-      where a.OrderDate>@OrderDate and OrderDate<DATEADD(day,7,@OrderDate)
+      where a.OrderDate>@OrderDate and a.OrderDate<=DATEADD(day,7,@OrderDate)
       group by a.OrderID,a.OrderDate, a.CustomerID
    COMMIT TRAN
 END;
 
-EXECUTE ods.uspGetOrderTotalandInsert '2013-05-01'
-EXECUTE ods.uspGetOrderTotalandInsert '2013-04-01'
-EXECUTE ods.uspGetOrderTotalandInsert '2013-03-01'
-EXECUTE ods.uspGetOrderTotalandInsert '2013-02-01'
-EXECUTE ods.uspGetOrderTotalandInsert '2013-01-01'
+EXECUTE ods.uspOrderTotalWipeandUpdate '2014-05-01'
+GO
+EXECUTE ods.uspOrderTotalWipeandUpdate '2013-04-01'
+GO
+EXECUTE ods.uspOrderTotalWipeandUpdate '2013-03-01'
+GO
+EXECUTE ods.uspOrderTotalWipeandUpdate '2014-04-18'
+GO
+EXECUTE ods.uspOrderTotalWipeandUpdate '2014-04-20'
 GO
 --
 select * from ods.Orders
@@ -484,7 +493,7 @@ set @json = N'[
          "DeliveryMethod":"Post",
          "ExpectedDeliveryDate":"2018-02-02",
          "SupplierReference":"WWI2308"
-      },
+      },                                                                            
       {
          "StockItemName":"Panzer Video Game",
          "Supplier":"5",
@@ -507,7 +516,7 @@ set @json = N'[
    ]
 }
 ]'
-select * into ods.temp
+select * into 
 from OPENJSON(@json, '$.PurchaseOrders')
 			 WITH (StockItemName nvarchar(100) '$.StockItemName',
 			       SupplierID int '$.Supplier',
@@ -522,7 +531,7 @@ from OPENJSON(@json, '$.PurchaseOrders')
 			       TypicalWeightPerUnit decimal(18,3) '$.TypicalWeightPerUnit',
 			       CountryOfManufacture nvarchar(50) '$.CountryOfManufacture',
 			       Range nvarchar(50) '$.Range')
-)
+
 
 
 --25. Revisit your answer in (19). Convert the result in JSON string and save it to the server using TSQL FOR JSON PATH.
@@ -554,9 +563,7 @@ CREATE PROCEDURE ods.uspInvoiceJson
 	@idate date,
 	@customerid int
 AS
-BEGIN
-
-
-
-
+BEGIN 
+      INSERT INTO ods.ConfirmedDeviveryJson
+	   SELECT 
 
