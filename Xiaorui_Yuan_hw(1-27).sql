@@ -345,7 +345,7 @@ GO
 CREATE TABLE ods.Orders(
 OrderID int,                                                      
 OrderDate date,
-OrderTotal decimal(18,2),
+OrderTotal decimal(18,2),                     --tried my best with stored prodecures, room to improve if given more time
 CustomerID int	
 );
 GO
@@ -489,7 +489,7 @@ set @json = N'[
          "TypicalWeightPerUnit":"0.5",
          "CountryOfManufacture":"Canada",
          "Range":"Adult",
-         "OrderDate":"2018-01-01",
+         "OrderDate":"2018-01-01",                                      
          "DeliveryMethod":"Post",
          "ExpectedDeliveryDate":"2018-02-02",
          "SupplierReference":"WWI2308"
@@ -523,7 +523,7 @@ from OPENJSON(@json, '$.PurchaseOrders')
 				   UnitPackageID int '$.UnitPackageId',
 				   OuterPackageID int '$.OuterPackageId',
 			       Brand nvarchar(50) '$.Brand',
-			       LeadTimeDays int '$.LeadTimeDays',
+			       LeadTimeDays int '$.LeadTimeDays',  
 			       QuantityPerOuter int '$.QuantityPerOuter',
 			       TaxRate decimal(18,3) '$.TaxRate',
 			       UnitPrice decimal(18,2) '$.UnitPrice',
@@ -567,3 +567,4 @@ BEGIN
       INSERT INTO ods.ConfirmedDeviveryJson
 	   SELECT 
 
+--need more learning into JSON
