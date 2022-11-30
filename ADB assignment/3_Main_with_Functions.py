@@ -97,9 +97,9 @@ register_table('silver_runtime_clean_table',silverPath)
 
 # Update Bronze table to Reflect the Loads
 # Step 1: Update Clean records
-Update_Clean_records()
+Update_Clean_records(silver_runtime_clean)
 # Step 2: Update Quarantined records
-Update_Quarantined_records()
+Update_Quarantined_records(silver_runtime_quarantine)
 
 # COMMAND ----------
 
