@@ -205,7 +205,7 @@ def runtime_clean_and_quarantine_dataframes(
 from delta.tables import DeltaTable
 from pyspark.sql.functions import *
 
-def Update_Clean_records(dataframe: Dataframe):
+def Update_Clean_records(dataframe:Dataframe):
     bronzeTable = DeltaTable.forPath(spark, bronzePath)
     silverAugmented = dataframe.withColumn("status", lit("loaded"))
 
@@ -221,7 +221,8 @@ def Update_Clean_records(dataframe: Dataframe):
 
 # COMMAND ----------
 
-def Update_Quarantined_records(dataframe: Dataframe):
+def Update_Quarantined_records(dataframe:Dataframe):
+    bronzeTable = DeltaTable.forPath(spark, bronzePath)
     silverAugmented = dataframe.withColumn(
     "status", lit("quarantined")
     )
@@ -238,8 +239,8 @@ def Update_Quarantined_records(dataframe: Dataframe):
 
 # COMMAND ----------
 
-def fix_runtime(dataframe: Dataframe):
-    dataframe.withColumn("RunTime", abs(col("RunTime")))
+# def fix_runtime(dataframe: Dataframe):
+#     dataframe.withColumn("RunTime", abs(col("RunTime")))
 
 # COMMAND ----------
 
@@ -259,6 +260,7 @@ def duplicated_non_duplicated_seperated():
 # COMMAND ----------
 
 def mark_duplicates():
+    bronzeTable = DeltaTable.forPath(spark, bronzePath)
     silverAugmented = bronzeDF_duplicates.withColumn(
     "status", lit("duplicated")
     )
@@ -276,8 +278,9 @@ def mark_duplicates():
 # COMMAND ----------
 
 def mark_non_duplicates():
+    bronzeTable = DeltaTable.forPath(spark, bronzePath)
     silverAugmented = bronzeDF_non_duplicates.withColumn(
-    "status", lit("non-duplicated")
+    "status", lit("non_duplicated")
     )
 
     update_match = "bronze.surrogateKEY = quarantine.surrogateKEY"
