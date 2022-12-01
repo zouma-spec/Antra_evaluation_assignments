@@ -313,10 +313,6 @@ display(genreDF) # the final genre dataframe
 
 # COMMAND ----------
 
-spark.read.load(genrePath)
-
-# COMMAND ----------
-
 #write data to path
 (
     genreDF
@@ -594,22 +590,12 @@ silverAugmented = bronzeDF_non_duplicates.withColumn(
 
 update_match = "bronze.movie = quarantine.movie"
 update = {"status": "quarantine.status"}
-
-    (
+(
         bronzeTable.alias("bronze")
         .merge(silverAugmented.alias("quarantine"), update_match)
         .whenMatchedUpdate(set=update)
         .execute()
     )
-
-# COMMAND ----------
-
-
-
-
-# COMMAND ----------
-
-
 
 # COMMAND ----------
 
