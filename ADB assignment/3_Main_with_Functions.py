@@ -144,7 +144,7 @@ mark_non_duplicates()
 # COMMAND ----------
 
 # filter records that are non-duplicated
-bronzeDF = spark.read.table("movie_bronze").filter("status = 'non-duplicated'")
+bronzeDF = spark.read.load(bronzePath).filter("status = 'non-duplicated'")
 
 # COMMAND ----------
 
