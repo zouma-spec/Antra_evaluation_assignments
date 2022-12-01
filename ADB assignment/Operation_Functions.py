@@ -205,7 +205,7 @@ def runtime_clean_and_quarantine_dataframes(
 from delta.tables import DeltaTable
 from pyspark.sql.functions import *
 
-def Update_Clean_records(dataframe:Dataframe):
+def Update_Clean_records(dataframe:DataFrame):
     bronzeTable = DeltaTable.forPath(spark, bronzePath)
     silverAugmented = dataframe.withColumn("status", lit("loaded"))
 
@@ -221,7 +221,7 @@ def Update_Clean_records(dataframe:Dataframe):
 
 # COMMAND ----------
 
-def Update_Quarantined_records(dataframe:Dataframe):
+def Update_Quarantined_records(dataframe:DataFrame):
     bronzeTable = DeltaTable.forPath(spark, bronzePath)
     silverAugmented = dataframe.withColumn(
     "status", lit("quarantined")
@@ -239,8 +239,8 @@ def Update_Quarantined_records(dataframe:Dataframe):
 
 # COMMAND ----------
 
-# def fix_runtime(dataframe: Dataframe):
-#     dataframe.withColumn("RunTime", abs(col("RunTime")))
+def fix_runtime(dataframe: DataFrame):
+    dataframe.withColumn("RunTime", abs(col("RunTime")))
 
 # COMMAND ----------
 
