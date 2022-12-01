@@ -266,6 +266,16 @@ LOCATION "{silverPath}"
 
 # COMMAND ----------
 
+dbutils.fs.rm(genrePath, recurse=True)
+dbutils.fs.rm(movieGenrePath, recurse=True)
+dbutils.fs.rm(languagePath, recurse=True)
+
+# dbutils.fs.mkdirs(genrePath)
+# dbutils.fs.mkdirs(movieGenrePath)
+# dbutils.fs.mkdirs(languagePath)
+
+# COMMAND ----------
+
 from pyspark.sql.functions import explode
 genreDF=(extractedDF.select(explode("genres")).alias("genres")).distinct()
 
@@ -285,8 +295,8 @@ display(genreDF)
 # COMMAND ----------
 
 genreDF=genreDF.select(
-    'genres',
-    'genres.*'
+    'col',
+    'col.*'
 )
 
 # COMMAND ----------
@@ -300,6 +310,10 @@ genreDF = (genreDF.filter(col("name") != ''))
 # COMMAND ----------
 
 display(genreDF) # the final genre dataframe
+
+# COMMAND ----------
+
+spark.read.load(genrePath)
 
 # COMMAND ----------
 
@@ -336,6 +350,8 @@ LOCATION "{genrePath}"
 
 # COMMAND ----------
 
+def explode_bronze(bronze: DataFrame, explode_column: str, alias: str, column: List = []) -> DataFrame:
+    return bronze.select(*column, explode(col(explode_column)).alias(alias))
 movieGenreDF = explode_bronze(extractedDF, "genres", "genres", ["Id"])
 
 # COMMAND ----------
@@ -527,9 +543,21 @@ spark.read.load(silverPath).count()
 
 # COMMAND ----------
 
+extractedDF.display()
+
+# COMMAND ----------
+
 # Mark duplicate records as duplicated, non-duplicate ercords as non-duplicated
-bronzeDF_duplicates = bronzeDF.groupBy("movie").count().filter("count > 1")
-bronzeDF_non_duplicates = bronzeDF.groupBy("movie").count().filter("count = 1")
+bronzeDF_duplicates = extractedDF.groupBy("movie").count().filter("count > 1")
+bronzeDF_non_duplicates = extractedDF.groupBy("movie").count().filter("count = 1")
+
+# COMMAND ----------
+
+extractedDF.display()
+
+# COMMAND ----------
+
+bronzeDF_duplicates.display()
 
 # COMMAND ----------
 
@@ -539,25 +567,32 @@ silverAugmented = bronzeDF_duplicates.withColumn(
     "status", lit("duplicated")
     )
 
-update_match = "bronze.surrogateKEY = quarantine.surrogateKEY"
+update_match = "bronze.movie = quarantine.movie"
 update = {"status": "quarantine.status"}
-
-    (
-        bronzeTable.alias("bronze")
-        .merge(silverAugmented.alias("quarantine"), update_match)
-        .whenMatchedUpdate(set=update)
-        .execute()
+(
+   bronzeTable.alias("bronze")
+    .merge(silverAugmented.alias("quarantine"), update_match)
+    .whenMatchedUpdate(set=update)
+    .execute()
     )
+
+# COMMAND ----------
+
+bronzeDF_duplicates.display()
+
+# COMMAND ----------
+
+
 
 # COMMAND ----------
 
 #mark non_duplicates in bronze table
 bronzeTable = DeltaTable.forPath(spark, bronzePath)
 silverAugmented = bronzeDF_non_duplicates.withColumn(
-    "status", lit("non-duplicated")
+    "status", lit("non_duplicated")
     )
 
-update_match = "bronze.surrogateKEY = quarantine.surrogateKEY"
+update_match = "bronze.movie = quarantine.movie"
 update = {"status": "quarantine.status"}
 
     (

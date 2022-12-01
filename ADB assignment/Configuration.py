@@ -10,9 +10,9 @@ rawPath = moviePath + '/0_raw'
 bronzePath = moviePath + '/1_bronze'
 silverPath = moviePath + '/2_silver'
 
-genrePath = silverPath + '/genre'
-movieGenrePath = silverPath + '/movieGenre'
-languagePath = silverPath + '/language'
+genrePath = moviePath + '/silver_genre'
+movieGenrePath = moviePath + '/silver_movieGenre'
+languagePath = moviePath + '/silver_language'
 
 spark.sql(f"CREATE DATABASE IF NOT EXISTS movie_{username}")
 spark.sql(f"USE movie_{username}")
