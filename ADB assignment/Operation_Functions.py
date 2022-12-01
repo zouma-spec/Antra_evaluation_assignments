@@ -9,6 +9,10 @@ from pyspark.sql.window import Window
 
 # COMMAND ----------
 
+
+
+# COMMAND ----------
+
 def ingest_raw(moving_from_Path:str, moving_to_Path:str) -> bool:
   file_list = [[file.path, file.name] for file in dbutils.fs.ls(moving_from_Path)]
 
@@ -254,18 +258,21 @@ def fix_budget():
 # COMMAND ----------
 
 def duplicated_non_duplicated_seperated():
-    bronzeDF_duplicates = bronzeDF.groupBy("movie").count().filter("count > 1")
-    bronzeDF_non_duplicates = bronzeDF.groupBy("movie").count().filter("count = 1")
+
+    bronzeDF_duplicates = extractedDF.groupBy("movie").count().filter("count > 1")
+    bronzeDF_non_duplicates = extractedDF.groupBy("movie").count().filter("count = 1")
 
 # COMMAND ----------
 
 def mark_duplicates():
+    
+    bronzeDF_duplicates = extractedDF.groupBy("movie").count().filter("count > 1")
     bronzeTable = DeltaTable.forPath(spark, bronzePath)
     silverAugmented = bronzeDF_duplicates.withColumn(
     "status", lit("duplicated")
     )
 
-    update_match = "bronze.surrogateKEY = quarantine.surrogateKEY"
+    update_match = "bronze.movie = quarantine.movie"
     update = {"status": "quarantine.status"}
 
     (
@@ -278,12 +285,15 @@ def mark_duplicates():
 # COMMAND ----------
 
 def mark_non_duplicates():
+    bronzeDF = spark.read.load(bronzePath)
+    bronzeDF_non_duplicates = extractedDF.groupBy("movie").count().filter("count = 1")
+
     bronzeTable = DeltaTable.forPath(spark, bronzePath)
     silverAugmented = bronzeDF_non_duplicates.withColumn(
     "status", lit("non_duplicated")
     )
 
-    update_match = "bronze.surrogateKEY = quarantine.surrogateKEY"
+    update_match = "bronze.movie = quarantine.movie"
     update = {"status": "quarantine.status"}
 
     (
