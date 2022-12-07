@@ -1,0 +1,9 @@
+{
+	"name": "ADFrui",
+	"location": "centralus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "4fefdf89-44bf-4345-904f-20bcd26427a5",
+		"tenantId": "ec75c03d-052d-4d59-9b52-83f21ed3d946"
+	}
+}
